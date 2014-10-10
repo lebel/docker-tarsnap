@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+nice tarsnap --humanize-numbers $*

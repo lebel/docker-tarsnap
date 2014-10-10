@@ -1,0 +1,6 @@
+#!/bin/sh
+
+HOST=$(hostname -s)
+TS=/helpers/tarsnap-shot
+
+$TS 2>&1 | tr -cd '\11\12\15\40-\176' | grep -v "to UTF-8$" | mailx -s "$HOST: tarsnap-shot" $MAILTO

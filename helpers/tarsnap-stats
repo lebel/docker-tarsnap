@@ -1,0 +1,4 @@
+#!/bin/sh
+RUNDIR=$(dirname $0)
+
+$RUNDIR/tarsnap-run --print-stats
