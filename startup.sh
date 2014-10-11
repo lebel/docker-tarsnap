@@ -11,8 +11,14 @@ if [ -e /config/authorized_keys ]; then
   chmod 600 /root/.ssh/authorized_keys
 fi
 
-# make sure MAILTO is respected
+# abort if MAILTO and INCLUDE isn't provided.
 
-if [ -e /helpers/tarsnap.cron ]; then
-  sed -i -e "s;\$MAILTO;$MAILTO;g" /helpers/tarsnap.cron
+if [ -z "$INCLUDE" ] || [ -z "$MAILTO" ]; then 
+   echo "You need to provide both MAILTO and INCLUDE when starting"
+   echo "this container."
+   exit 1
 fi
+
+# fill MAILTO and INCLUDE into helpers scripts.
+
+sed -i -e "s;INCLUDE;$INCLUDE;g" -e "s;MAILTO;$MAILTO;g" /helpers/*
