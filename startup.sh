@@ -21,7 +21,7 @@ if [ -e /config/crontab ]; then
   (crontab -l 2>/dev/null; cat /config/crontab) | crontab -
 else
   (crontab -l 2>/dev/null; echo "@daily /helpers/tarsnap.cron") | crontab -
-if
+fi
 
 # if you want to log into your container, use a /config/authorized_keys
 # that contains valid key to get into the root account.
