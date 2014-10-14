@@ -35,5 +35,5 @@ ADD postfix.sh /etc/service/postfix/run
 RUN chmod +x /etc/service/postfix/run
 
 # clean up
-RUN apt-get autoremove -yq && apt-get clean && \
+RUN apt-get --purge remove logrotate -yq && apt-get autoremove -yq && apt-get clean && \
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
