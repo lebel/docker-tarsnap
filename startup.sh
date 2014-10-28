@@ -17,10 +17,14 @@ fi
 
 # if /config/crontab exists, use it, otherwise, use the @daily
 
-if [ -e /config/crontab ]; then
-  (crontab -l 2>/dev/null; cat /config/crontab) | crontab -
-else
-  (crontab -l 2>/dev/null; echo "@daily /helpers/tarsnap.cron") | crontab -
+C=$(crontab -l 2>/dev/null |wc -l)
+
+if [ $C -eq 0 ]; then
+  if [ -e /config/crontab ]; then
+    (crontab -l 2>/dev/null; cat /config/crontab) | crontab -
+  else
+    (crontab -l 2>/dev/null; echo "@daily /helpers/tarsnap.cron") | crontab -
+  fi
 fi
 
 # if you want to log into your container, use a /config/authorized_keys
