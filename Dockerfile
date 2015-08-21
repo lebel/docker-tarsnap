@@ -15,7 +15,7 @@ CMD ["/sbin/my_init"]
 RUN apt-get update -q && \
     apt-get install bsd-mailx postfix -yq && \
     apt-get install build-essential wget libssl-dev zlib1g-dev e2fslibs-dev -yq && \
-    wget https://www.tarsnap.com/download/tarsnap-autoconf-1.0.35.tgz -O /tmp/tarsnap.tar.gz && \
+    wget https://www.tarsnap.com/download/tarsnap-autoconf-1.0.36.1.tgz -O /tmp/tarsnap.tar.gz && \
     mkdir /tmp/tarsnap && \
     tar -C /tmp/tarsnap -xvf /tmp/tarsnap.tar.gz --strip-components 1 && \
     cd /tmp/tarsnap && ./configure --prefix=/usr --sysconfdir=/etc && make install
