@@ -1,7 +1,7 @@
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:latest
 MAINTAINER David Lebel <lebel@lebel.org>
 ENV DEBIAN_FRONTEND noninteractive
-ENV TARSNAP_VERSION 1.0.35
+ENV TARSNAP_VERSION 1.0.36.1
 
 # Set correct environment variables
 ENV HOME /root
