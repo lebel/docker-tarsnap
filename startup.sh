@@ -27,14 +27,6 @@ if [ $C -eq 0 ]; then
   fi
 fi
 
-# if you want to log into your container, use a /config/authorized_keys
-# that contains valid key to get into the root account.
-
-if [ -e /config/authorized_keys ]; then
-  cp /config/authorized_keys /root/.ssh/authorized_keys
-  chmod 600 /root/.ssh/authorized_keys
-fi
-
 # abort if MAILTO and INCLUDE isn't provided.
 
 if [ -z "$INCLUDE" ] || [ -z "$MAILTO" ]; then 
