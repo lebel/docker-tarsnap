@@ -1,24 +1,22 @@
-FROM phusion/baseimage:latest
+FROM phusion/baseimage:master-amd64
 MAINTAINER David Lebel <lebel@lebel.org>
 ENV DEBIAN_FRONTEND noninteractive
-ENV TARSNAP_VERSION 1.0.36.1
+ENV TARSNAP_VERSION 1.0.39
 
 # Set correct environment variables
 ENV HOME /root
 
 # VOLUMEs
-VOLUME ["/config", "/data"]
+VOLUME ["/cotarsnap-deb-packaging-key.ascnfig", "/data"]
 
 # Use baseimage-docker's init system
 CMD ["/sbin/my_init"]
 
+RUN curl -o tarsnap-deb-packaging-key.asc https://pkg.tarsnap.com/tarsnap-deb-packaging-key.asc && \
+        apt-key add tarsnap-deb-packaging-key.asc && \
+        echo "deb http://pkg.tarsnap.com/deb/$(lsb_release -s -c) ./" | tee -a /etc/apt/sources.list.d/tarsnap.list
 RUN apt-get update -q && \
-    apt-get install bsd-mailx postfix -yq && \
-    apt-get install build-essential wget libssl-dev zlib1g-dev e2fslibs-dev -yq && \
-    wget https://www.tarsnap.com/download/tarsnap-autoconf-1.0.36.1.tgz -O /tmp/tarsnap.tar.gz && \
-    mkdir /tmp/tarsnap && \
-    tar -C /tmp/tarsnap -xvf /tmp/tarsnap.tar.gz --strip-components 1 && \
-    cd /tmp/tarsnap && ./configure --prefix=/usr --sysconfdir=/etc && make install
+    apt-get install bsd-mailx postfix tarsnap -yq
 
 # insert a configured tarsnap.conf
 ADD tarsnap.conf /etc/tarsnap.conf
