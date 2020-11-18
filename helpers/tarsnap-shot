@@ -3,6 +3,7 @@
 INC="INCLUDE"
 NAME=$(hostname -s)
 TIME="`date +%Y%m%d-%H%M`"
+export TZ="EST5EDT"
 export PATH=$PATH:$(dirname $0)
 
 [ -z "$INC" ] && echo "nothing in \$INC" && exit 1
