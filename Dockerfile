@@ -7,7 +7,7 @@ ENV TARSNAP_VERSION 1.0.39
 ENV HOME /root
 
 # VOLUMEs
-VOLUME ["/cotarsnap-deb-packaging-key.ascnfig", "/data"]
+VOLUME ["/config", "/data"]
 
 # Use baseimage-docker's init system
 CMD ["/sbin/my_init"]
