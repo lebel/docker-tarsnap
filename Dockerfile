@@ -1,37 +1,66 @@
-FROM phusion/baseimage:master-amd64
-MAINTAINER David Lebel <lebel@lebel.org>
-ENV DEBIAN_FRONTEND noninteractive
-ENV TARSNAP_VERSION 1.0.39
+FROM alpine:latest
+MAINTAINER David Lebel <lebel@nobiaze.ca>
 
 # Set correct environment variables
 ENV HOME /root
 
 # VOLUMEs
-VOLUME ["/cotarsnap-deb-packaging-key.ascnfig", "/data"]
-
-# Use baseimage-docker's init system
-CMD ["/sbin/my_init"]
-
-RUN curl -o tarsnap-deb-packaging-key.asc https://pkg.tarsnap.com/tarsnap-deb-packaging-key.asc && \
-        apt-key add tarsnap-deb-packaging-key.asc && \
-        echo "deb http://pkg.tarsnap.com/deb/$(lsb_release -s -c) ./" | tee -a /etc/apt/sources.list.d/tarsnap.list
-RUN apt-get update -q && \
-    apt-get install bsd-mailx postfix tarsnap -yq
+VOLUME ["/config", "/data"]
 
 # insert a configured tarsnap.conf
-ADD tarsnap.conf /etc/tarsnap.conf
+ADD tarsnap.conf /etc/tarsnap
 
 # add various tarsnap's helpers in /helpers
 ADD helpers/ /helpers
 
-# Add startup.sh to the my_init.d initialisation.
-ADD startup.sh /etc/my_init.d/00_startup.sh
+# Activate the various services
+RUN set -x \
+    && apk add --update --no-cache openrc \
+    # Disable getty's
+    && sed -i 's/^\(tty\d\:\:\)/#\1/g' /etc/inittab \
+    && sed -i \
+        # Change subsystem type to "docker"
+        -e 's/#rc_sys=".*"/rc_sys="docker"/g' \
+        # Allow all variables through
+        -e 's/#rc_env_allow=".*"/rc_env_allow="\*"/g' \
+        # Start crashed services
+        -e 's/#rc_crashed_stop=.*/rc_crashed_stop=NO/g' \
+        -e 's/#rc_crashed_start=.*/rc_crashed_start=YES/g' \
+        # Define extra dependencies for services
+        -e 's/#rc_provide=".*"/rc_provide="loopback net"/g' \
+        /etc/rc.conf \
+    # Remove unnecessary services
+    && rm -f /etc/init.d/hwdrivers \
+            /etc/init.d/hwclock \
+            /etc/init.d/hwdrivers \
+            /etc/init.d/modules \
+            /etc/init.d/modules-load \
+            /etc/init.d/modloop \
+    # Can't do cgroups
+    && sed -i 's/cgroup_add_service /# cgroup_add_service /g' /lib/rc/sh/openrc-run.sh \
+    && sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh
 
-# Add postfix to runit
-RUN mkdir /etc/service/postfix
-ADD postfix.sh /etc/service/postfix/run
-RUN chmod +x /etc/service/postfix/run
+RUN apk add tarsnap postfix dcron heirloom-mailx
 
-# clean up
-RUN apt-get --purge remove logrotate -yq && apt-get autoremove -yq && apt-get clean && \
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN rc-update add postfix default; \
+    rc-update add dcron default; \
+    rc-update add local default
+
+# Configure postfix
+
+RUN postconf -e myhostname=moya.lan; \
+    postconf -e mydomain=lebel.org; \
+    postconf -e relayhost=smtp.lan; \
+    postconf -e smtp_use_tls=no; \
+    postconf -e smtpd_use_tls=no; \
+    postconf -e myorigin='$mydomain'; \
+    postconf -e inet_protocols='all'; \
+    postconf -e inet_interfaces='all'; \
+    postconf -e mynetworks_style='host'
+
+ADD startup.sh /etc/local.d/startup.start
+
+RUN ln -s /helpers/tarsnap.cron /etc/periodic/daily/tarsnap.cron
+
+WORKDIR /etc/init.d
+CMD ["/sbin/init"]
