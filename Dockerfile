@@ -7,9 +7,6 @@ ENV HOME /root
 # VOLUMEs
 VOLUME ["/config", "/data"]
 
-# insert a configured tarsnap.conf
-ADD tarsnap.conf /etc/tarsnap
-
 # add various tarsnap's helpers in /helpers
 ADD helpers/ /helpers
 
@@ -41,6 +38,9 @@ RUN set -x \
     && sed -i 's/VSERVER/DOCKER/Ig' /lib/rc/sh/init.sh
 
 RUN apk add tarsnap postfix dcron heirloom-mailx
+
+# insert a configured tarsnap.conf
+ADD tarsnap.conf /etc/tarsnap
 
 RUN rc-update add postfix default; \
     rc-update add dcron default; \
